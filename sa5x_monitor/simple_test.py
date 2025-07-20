@@ -21,7 +21,7 @@ def test_config_manager():
         
         # Test basic functionality
         assert config is not None
-        assert config.get('serial.default_port') == '/dev/ttyUSB0'
+        assert config.get('serial.default_port') == '/dev/ttyS6'
         assert config.get('serial.default_baudrate') == 115200
         
         # Test setting values

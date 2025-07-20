@@ -3,16 +3,23 @@
 class SA5XMonitor {
     constructor() {
         this.socket = null;
-        this.chart = null;
+        this.charts = {};
         this.isConnected = false;
         this.isMonitoring = false;
-        this.chartData = {
-            labels: [],
-            datasets: []
+        this.dataHistory = {
+            timestamps: [],
+            frequency_error: [],
+            temperature: [],
+            voltage: [],
+            current: [],
+            lock_status: [],
+            holdover_status: []
         };
+        this.maxDataPoints = 100;
+        this.currentChartView = 'freq-temp';
         
         this.initializeSocket();
-        this.initializeChart();
+        this.initializeCharts();
         this.setupEventListeners();
         this.loadConfiguration();
     }
@@ -33,7 +40,8 @@ class SA5XMonitor {
         
         this.socket.on('status_update', (data) => {
             this.updateStatusDisplay(data);
-            this.updateChart(data);
+            this.updateCharts(data);
+            this.updateStatistics();
         });
         
         this.socket.on('test_completed', (data) => {
@@ -45,16 +53,30 @@ class SA5XMonitor {
         });
     }
     
-    initializeChart() {
+    initializeCharts() {
+        // Main real-time chart
+        this.initializeMainChart();
+        
+        // Frequency stability chart
+        this.initializeFrequencyChart();
+        
+        // Temperature and electrical chart
+        this.initializeTempElectricalChart();
+        
+        // Allan deviation chart
+        this.initializeAllanChart();
+    }
+    
+    initializeMainChart() {
         const ctx = document.getElementById('realtime-chart').getContext('2d');
         
-        this.chart = new Chart(ctx, {
+        this.charts.main = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [
                     {
-                        label: 'Frequency Error',
+                        label: 'Frequency Error (ppm)',
                         data: [],
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgba(75, 192, 192, 0.1)',
@@ -62,7 +84,7 @@ class SA5XMonitor {
                         yAxisID: 'y'
                     },
                     {
-                        label: 'Temperature',
+                        label: 'Temperature (°C)',
                         data: [],
                         borderColor: 'rgb(255, 99, 132)',
                         backgroundColor: 'rgba(255, 99, 132, 0.1)',
@@ -118,6 +140,197 @@ class SA5XMonitor {
         });
     }
     
+    initializeFrequencyChart() {
+        const ctx = document.getElementById('frequency-chart').getContext('2d');
+        
+        this.charts.frequency = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Frequency Error',
+                        data: [],
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: 'Moving Average',
+                        data: [],
+                        borderColor: 'rgb(255, 159, 64)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                        tension: 0.1,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Frequency Error (ppm)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+    
+    initializeTempElectricalChart() {
+        const ctx = document.getElementById('temp-electrical-chart').getContext('2d');
+        
+        this.charts.tempElectrical = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Temperature (°C)',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Voltage (V)',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Current (A)',
+                        data: [],
+                        borderColor: 'rgb(255, 205, 86)',
+                        backgroundColor: 'rgba(255, 205, 86, 0.1)',
+                        tension: 0.1,
+                        yAxisID: 'y2'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Voltage (V)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Current (A)'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+    
+    initializeAllanChart() {
+        const ctx = document.getElementById('allan-chart').getContext('2d');
+        
+        this.charts.allan = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Allan Deviation',
+                        data: [],
+                        borderColor: 'rgb(153, 102, 255)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'logarithmic',
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Tau (seconds)'
+                        }
+                    },
+                    y: {
+                        type: 'logarithmic',
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Allan Deviation'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    }
+    
     setupEventListeners() {
         // Connection buttons
         document.getElementById('connect-btn').addEventListener('click', () => {
@@ -161,10 +374,153 @@ class SA5XMonitor {
             this.saveConfiguration();
         });
         
+        // Chart view buttons
+        document.getElementById('chart-freq-temp').addEventListener('click', () => {
+            this.switchChartView('freq-temp');
+        });
+        
+        document.getElementById('chart-electrical').addEventListener('click', () => {
+            this.switchChartView('electrical');
+        });
+        
+        document.getElementById('chart-status').addEventListener('click', () => {
+            this.switchChartView('status');
+        });
+        
+        document.getElementById('chart-allan').addEventListener('click', () => {
+            this.switchChartView('allan');
+        });
+        
+        // Allan deviation buttons
+        document.getElementById('allan-freq').addEventListener('click', () => {
+            this.switchAllanView('frequency');
+        });
+        
+        document.getElementById('allan-temp').addEventListener('click', () => {
+            this.switchAllanView('temperature');
+        });
+        
         // Modal events
         document.getElementById('download-results-btn').addEventListener('click', () => {
             this.downloadResults();
         });
+    }
+    
+    switchChartView(view) {
+        this.currentChartView = view;
+        
+        // Update button states
+        document.querySelectorAll('#chart-freq-temp, #chart-electrical, #chart-status, #chart-allan')
+            .forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`chart-${view}`).classList.add('active');
+        
+        // Update main chart based on view
+        this.updateMainChartView(view);
+    }
+    
+    switchAllanView(type) {
+        // Update Allan deviation chart based on type
+        document.querySelectorAll('#allan-freq, #allan-temp')
+            .forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`allan-${type}`).classList.add('active');
+        
+        this.updateAllanChart(type);
+    }
+    
+    updateMainChartView(view) {
+        const chart = this.charts.main;
+        
+        switch(view) {
+            case 'freq-temp':
+                chart.data.datasets[0].label = 'Frequency Error (ppm)';
+                chart.data.datasets[1].label = 'Temperature (°C)';
+                chart.options.scales.y.title.text = 'Frequency Error (ppm)';
+                chart.options.scales.y1.title.text = 'Temperature (°C)';
+                break;
+            case 'electrical':
+                chart.data.datasets[0].label = 'Voltage (V)';
+                chart.data.datasets[1].label = 'Current (A)';
+                chart.options.scales.y.title.text = 'Voltage (V)';
+                chart.options.scales.y1.title.text = 'Current (A)';
+                break;
+            case 'status':
+                chart.data.datasets[0].label = 'Lock Status';
+                chart.data.datasets[1].label = 'Holdover Status';
+                chart.options.scales.y.title.text = 'Status';
+                chart.options.scales.y1.title.text = 'Status';
+                break;
+            case 'allan':
+                chart.data.datasets[0].label = 'Allan Deviation';
+                chart.data.datasets[1].label = 'Tau';
+                chart.options.scales.y.title.text = 'Allan Deviation';
+                chart.options.scales.y1.title.text = 'Tau (s)';
+                break;
+        }
+        
+        chart.update();
+    }
+    
+    updateAllanChart(type) {
+        // Calculate Allan deviation for the specified type
+        const data = type === 'frequency' ? this.dataHistory.frequency_error : this.dataHistory.temperature;
+        const allanData = this.calculateAllanDeviation(data);
+        
+        this.charts.allan.data.datasets[0].data = allanData;
+        this.charts.allan.update();
+    }
+    
+    calculateAllanDeviation(data) {
+        // Simple Allan deviation calculation
+        // In a real implementation, this would be more sophisticated
+        const allanData = [];
+        const maxTau = Math.min(50, Math.floor(data.length / 2));
+        
+        for (let tau = 1; tau <= maxTau; tau++) {
+            let sum = 0;
+            let count = 0;
+            
+            for (let i = 0; i < data.length - 2 * tau; i++) {
+                const diff = data[i + 2 * tau] - 2 * data[i + tau] + data[i];
+                sum += diff * diff;
+                count++;
+            }
+            
+            if (count > 0) {
+                const allanDev = Math.sqrt(sum / (2 * count * tau * tau));
+                allanData.push({ x: tau, y: allanDev });
+            }
+        }
+        
+        return allanData;
+    }
+    
+    updateStatistics() {
+        const freqData = this.dataHistory.frequency_error;
+        const tempData = this.dataHistory.temperature;
+        const voltageData = this.dataHistory.voltage;
+        
+        if (freqData.length > 0) {
+            const freqStdDev = this.calculateStdDev(freqData);
+            document.getElementById('freq-std-dev').textContent = freqStdDev.toExponential(3);
+        }
+        
+        if (tempData.length > 0) {
+            const tempStdDev = this.calculateStdDev(tempData);
+            document.getElementById('temp-std-dev').textContent = tempStdDev.toFixed(3);
+        }
+        
+        if (voltageData.length > 0) {
+            const voltageStdDev = this.calculateStdDev(voltageData);
+            document.getElementById('voltage-std-dev').textContent = voltageStdDev.toFixed(3);
+        }
+        
+        document.getElementById('data-points').textContent = this.dataHistory.timestamps.length;
+    }
+    
+    calculateStdDev(data) {
+        const mean = data.reduce((sum, val) => sum + val, 0) / data.length;
+        const variance = data.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / data.length;
+        return Math.sqrt(variance);
     }
     
     async connect() {
@@ -438,24 +794,88 @@ class SA5XMonitor {
         });
     }
     
-    updateChart(data) {
+    updateCharts(data) {
         const timestamp = new Date(data.timestamp).toLocaleTimeString();
         
-        // Add new data point
-        this.chartData.labels.push(timestamp);
-        this.chartData.datasets[0].data.push(data.frequency_error || 0);
-        this.chartData.datasets[1].data.push(data.temperature || 0);
+        // Update data history
+        this.dataHistory.timestamps.push(timestamp);
+        this.dataHistory.frequency_error.push(data.frequency_error || 0);
+        this.dataHistory.temperature.push(data.temperature || 0);
+        this.dataHistory.voltage.push(data.voltage || 0);
+        this.dataHistory.current.push(data.current || 0);
+        this.dataHistory.lock_status.push(data.lock_status ? 1 : 0);
+        this.dataHistory.holdover_status.push(data.holdover_status ? 1 : 0);
         
-        // Keep only last 50 points
-        if (this.chartData.labels.length > 50) {
-            this.chartData.labels.shift();
-            this.chartData.datasets[0].data.shift();
-            this.chartData.datasets[1].data.shift();
+        // Keep only last maxDataPoints
+        if (this.dataHistory.timestamps.length > this.maxDataPoints) {
+            this.dataHistory.timestamps.shift();
+            this.dataHistory.frequency_error.shift();
+            this.dataHistory.temperature.shift();
+            this.dataHistory.voltage.shift();
+            this.dataHistory.current.shift();
+            this.dataHistory.lock_status.shift();
+            this.dataHistory.holdover_status.shift();
         }
         
-        // Update chart
-        this.chart.data = this.chartData;
-        this.chart.update('none');
+        // Update main chart based on current view
+        this.updateMainChartData();
+        
+        // Update frequency chart
+        this.charts.frequency.data.labels = [...this.dataHistory.timestamps];
+        this.charts.frequency.data.datasets[0].data = [...this.dataHistory.frequency_error];
+        this.charts.frequency.data.datasets[1].data = this.calculateMovingAverage(this.dataHistory.frequency_error, 5);
+        
+        // Update temp-electrical chart
+        this.charts.tempElectrical.data.labels = [...this.dataHistory.timestamps];
+        this.charts.tempElectrical.data.datasets[0].data = [...this.dataHistory.temperature];
+        this.charts.tempElectrical.data.datasets[1].data = [...this.dataHistory.voltage];
+        this.charts.tempElectrical.data.datasets[2].data = [...this.dataHistory.current];
+        
+        // Update Allan chart periodically (every 10 points)
+        if (this.dataHistory.frequency_error.length % 10 === 0) {
+            this.updateAllanChart('frequency');
+        }
+        
+        // Update all charts
+        this.charts.main.update('none');
+        this.charts.frequency.update('none');
+        this.charts.tempElectrical.update('none');
+    }
+    
+    updateMainChartData() {
+        const chart = this.charts.main;
+        
+        switch(this.currentChartView) {
+            case 'freq-temp':
+                chart.data.labels = [...this.dataHistory.timestamps];
+                chart.data.datasets[0].data = [...this.dataHistory.frequency_error];
+                chart.data.datasets[1].data = [...this.dataHistory.temperature];
+                break;
+            case 'electrical':
+                chart.data.labels = [...this.dataHistory.timestamps];
+                chart.data.datasets[0].data = [...this.dataHistory.voltage];
+                chart.data.datasets[1].data = [...this.dataHistory.current];
+                break;
+            case 'status':
+                chart.data.labels = [...this.dataHistory.timestamps];
+                chart.data.datasets[0].data = [...this.dataHistory.lock_status];
+                chart.data.datasets[1].data = [...this.dataHistory.holdover_status];
+                break;
+            case 'allan':
+                // Allan deviation data is handled separately
+                break;
+        }
+    }
+    
+    calculateMovingAverage(data, window) {
+        const result = [];
+        for (let i = 0; i < data.length; i++) {
+            const start = Math.max(0, i - window + 1);
+            const values = data.slice(start, i + 1);
+            const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+            result.push(avg);
+        }
+        return result;
     }
     
     updateButtonStates() {

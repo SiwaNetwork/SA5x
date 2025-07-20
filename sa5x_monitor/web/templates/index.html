@@ -175,9 +175,17 @@
                 <div class="card">
                     <div class="card-header">
                         <h5><i class="fas fa-chart-area"></i> Real-time Data</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" id="chart-freq-temp">Frequency & Temp</button>
+                            <button type="button" class="btn btn-outline-primary" id="chart-electrical">Electrical</button>
+                            <button type="button" class="btn btn-outline-primary" id="chart-status">Status</button>
+                            <button type="button" class="btn btn-outline-primary" id="chart-allan">Allan Deviation</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <canvas id="realtime-chart" width="400" height="200"></canvas>
+                        <div class="chart-container" style="position: relative; height:400px;">
+                            <canvas id="realtime-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,6 +200,69 @@
                             <p><strong>Holdover Status:</strong> <span id="holdover-status">--</span></p>
                             <p><strong>Current:</strong> <span id="current-value">--</span></p>
                             <p><strong>Last Update:</strong> <span id="last-update">--</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistical Analysis -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="statistics">
+                            <p><strong>Freq Std Dev:</strong> <span id="freq-std-dev">--</span></p>
+                            <p><strong>Temp Std Dev:</strong> <span id="temp-std-dev">--</span></p>
+                            <p><strong>Voltage Std Dev:</strong> <span id="voltage-std-dev">--</span></p>
+                            <p><strong>Data Points:</strong> <span id="data-points">--</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Charts Row -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Frequency Stability</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="frequency-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-thermometer-half"></i> Temperature & Electrical</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:300px;">
+                            <canvas id="temp-electrical-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allan Deviation Chart -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-scatter"></i> Allan Deviation Analysis</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="allan-freq">Frequency</button>
+                            <button type="button" class="btn btn-outline-secondary" id="allan-temp">Temperature</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:350px;">
+                            <canvas id="allan-chart"></canvas>
                         </div>
                     </div>
                 </div>

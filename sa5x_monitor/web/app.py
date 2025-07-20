@@ -40,6 +40,10 @@ class SA5XWebMonitor:
         self.monitoring_active = False
         self.current_data = {}
         
+        # Добавляем переменные для хранения загруженных данных
+        self.uploaded_log_data = None
+        self.uploaded_log_results = None
+        
         # Setup logging
         self._setup_logging()
         
@@ -199,13 +203,13 @@ class SA5XWebMonitor:
         
         @self.app.route('/test/results/<filename>')
         def get_test_results(filename):
-            """Get test results"""
+            """Get test results from file"""
             try:
-                results_file = Path('results') / filename
-                if results_file.exists():
-                    with open(results_file, 'r') as f:
-                        data = json.load(f)
-                    return jsonify(data)
+                filepath = Path('uploads') / filename
+                if filepath.exists():
+                    with open(filepath, 'r') as f:
+                        results = json.load(f)
+                    return jsonify(results)
                 else:
                     return jsonify({'error': 'Results file not found'}), 404
             except Exception as e:
@@ -213,27 +217,25 @@ class SA5XWebMonitor:
         
         @self.app.route('/config', methods=['GET', 'POST'])
         def config():
-            """Configuration management"""
+            """Get or update configuration"""
             if request.method == 'GET':
-                return jsonify(self.config.get_config_summary())
+                return jsonify(self.config.get_all())
             else:
                 try:
                     data = request.get_json()
-                    for key, value in data.items():
-                        self.config.set(key, value)
-                    return jsonify({'status': 'config_updated'})
+                    self.config.update(data)
+                    return jsonify({'status': 'updated'})
                 except Exception as e:
                     return jsonify({'error': str(e)}), 500
         
         @self.app.route('/logs')
         def get_logs():
-            """Get recent logs"""
+            """Get available log files"""
             try:
-                log_file = self.config.get('logging.log_file', 'sa5x_monitor.log')
-                if Path(log_file).exists():
-                    with open(log_file, 'r') as f:
-                        lines = f.readlines()
-                    return jsonify({'logs': lines[-100:]})  # Last 100 lines
+                log_dir = Path('uploads')
+                if log_dir.exists():
+                    log_files = [f.name for f in log_dir.glob('*.log')]
+                    return jsonify({'logs': log_files})
                 else:
                     return jsonify({'logs': []})
             except Exception as e:
@@ -258,6 +260,10 @@ class SA5XWebMonitor:
                 # Parse log file
                 parser = LogParser()
                 results = parser.parse_holdover_log(str(filepath))
+                
+                # Сохраняем данные для использования в графиках
+                self.uploaded_log_results = results
+                self.uploaded_log_data = self._extract_log_data_for_charts(str(filepath))
                 
                 return jsonify({
                     'status': 'log_parsed',
@@ -286,6 +292,10 @@ class SA5XWebMonitor:
         def get_chart_data(chart_type):
             """Get chart data for specific chart type"""
             try:
+                # Проверяем, есть ли загруженные данные логов
+                if self.uploaded_log_data and chart_type in ['frequency', 'temperature', 'electrical']:
+                    return jsonify(self.uploaded_log_data[chart_type])
+                
                 if not self.current_data:
                     return jsonify({'error': 'No data available'}), 404
                 
@@ -299,6 +309,11 @@ class SA5XWebMonitor:
         def get_allan_deviation(data_type):
             """Calculate and return Allan deviation for specified data type"""
             try:
+                # Если есть загруженные данные логов, используем их
+                if self.uploaded_log_results and data_type in ['frequency', 'temperature']:
+                    allan_data = self._calculate_allan_deviation_from_log(data_type)
+                    return jsonify(allan_data)
+                
                 if not self.current_data:
                     return jsonify({'error': 'No data available'}), 404
                 
@@ -383,6 +398,106 @@ class SA5XWebMonitor:
         except Exception as e:
             self.logger.error(f"Holdover test failed: {e}")
             self.socketio.emit('test_error', {'error': str(e)})
+    
+    def _extract_log_data_for_charts(self, log_file):
+        """Extract data from log file for chart display"""
+        try:
+            parser = LogParser()
+            measurements = parser._parse_log_file(log_file)
+            
+            if not measurements:
+                return None
+            
+            # Extract data arrays
+            timestamps = [m['timestamp'] for m in measurements]
+            freq_errors = [m['frequency_error'] for m in measurements]
+            temperatures = [m['temperature'] for m in measurements]
+            voltages = [m['voltage'] for m in measurements]
+            currents = [m['current'] for m in measurements]
+            
+            # Format timestamps for display
+            formatted_timestamps = [datetime.fromtimestamp(ts).strftime('%H:%M:%S') for ts in timestamps]
+            
+            return {
+                'frequency': {
+                    'labels': formatted_timestamps,
+                    'datasets': [{
+                        'label': 'Frequency Error (ppm)',
+                        'data': freq_errors
+                    }]
+                },
+                'temperature': {
+                    'labels': formatted_timestamps,
+                    'datasets': [{
+                        'label': 'Temperature (°C)',
+                        'data': temperatures
+                    }]
+                },
+                'electrical': {
+                    'labels': formatted_timestamps,
+                    'datasets': [
+                        {
+                            'label': 'Voltage (V)',
+                            'data': voltages
+                        },
+                        {
+                            'label': 'Current (A)',
+                            'data': currents
+                        }
+                    ]
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to extract log data: {e}")
+            return None
+    
+    def _calculate_allan_deviation_from_log(self, data_type):
+        """Calculate Allan deviation from uploaded log data"""
+        try:
+            if not self.uploaded_log_results:
+                return {'error': 'No log data available'}
+            
+            # Use the already parsed results
+            results = self.uploaded_log_results
+            
+            if data_type == 'frequency':
+                # Use the Allan deviation already calculated by the parser
+                allan_deviations = results.get('allan_deviations', {})
+                
+                # Format data for chart
+                allan_data = []
+                for tau, dev in allan_deviations.items():
+                    if dev > 0:  # Only include valid deviations
+                        allan_data.append({
+                            'tau': tau,
+                            'allan_deviation': dev
+                        })
+                
+                return {
+                    'data_type': data_type,
+                    'allan_data': allan_data,
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'uploaded_log',
+                    'total_measurements': results.get('measurement_count', 0),
+                    'duration': results.get('duration', 0)
+                }
+            elif data_type == 'temperature':
+                # For temperature, we would need to implement similar calculation
+                # For now, return a simplified version
+                return {
+                    'data_type': data_type,
+                    'allan_data': [],
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'uploaded_log',
+                    'message': 'Temperature Allan deviation not yet implemented'
+                }
+            else:
+                return {'error': 'Unknown data type'}
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate Allan deviation from log: {e}")
+            return {'error': str(e)}
     
     def _calculate_statistics(self):
         """Calculate statistical analysis of monitoring data"""

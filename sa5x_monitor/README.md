@@ -34,13 +34,13 @@ pip install -r requirements.txt
 #### Базовое использование
 ```bash
 # Показать текущий статус SA5X
-python cli/main.py --port /dev/ttyUSB0
+python cli/main.py --port /dev/ttyS6
 
 # Запустить мониторинг
-python cli/main.py --port /dev/ttyUSB0 --monitor --interval 10
+python cli/main.py --port /dev/ttyS6 --monitor --interval 10
 
 # Запустить тест holdover
-python cli/main.py --port /dev/ttyUSB0 --holdover-test --duration 3600 --interval 10
+python cli/main.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10
 
 # Анализ существующего лога
 python cli/main.py --parse-log holdover_log.txt
@@ -106,7 +106,7 @@ sa5x_monitor/
 ```json
 {
   "serial": {
-    "default_port": "/dev/ttyUSB0",
+    "default_port": "/dev/ttyS6",
     "default_baudrate": 115200,
     "default_timeout": 1.0
   },
@@ -161,12 +161,12 @@ sa5x_monitor/
 
 ### Тест holdover на 1 час
 ```bash
-python cli/main.py --port /dev/ttyUSB0 --holdover-test --duration 3600 --interval 10 --output test_results.json
+python cli/main.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10 --output test_results.json
 ```
 
 ### Мониторинг с интервалом 5 секунд
 ```bash
-python cli/main.py --port /dev/ttyUSB0 --monitor --interval 5
+python cli/main.py --port /dev/ttyS6 --monitor --interval 5
 ```
 
 ### Анализ существующего лога

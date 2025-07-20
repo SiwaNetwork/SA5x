@@ -98,7 +98,7 @@ pip install -r requirements.txt
 python3 demo.py
 
 # CLI версия
-python3 run_cli.py --port /dev/ttyUSB0 --monitor
+python3 run_cli.py --port /dev/ttyS6 --monitor
 
 # Web версия
 python3 run_web.py
@@ -114,10 +114,10 @@ python3 run_web.py
 ### CLI команды
 ```bash
 # Мониторинг
-python3 run_cli.py --port /dev/ttyUSB0 --monitor --interval 10
+python3 run_cli.py --port /dev/ttyS6 --monitor --interval 10
 
 # Тест holdover
-python3 run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 3600
+python3 run_cli.py --port /dev/ttyS6 --holdover-test --duration 3600
 
 # Анализ лога
 python3 run_cli.py --parse-log examples/sample_holdover_log.txt
@@ -136,7 +136,7 @@ python3 run_cli.py --parse-log examples/sample_holdover_log.txt
 ```json
 {
   "serial": {
-    "default_port": "/dev/ttyUSB0",
+    "default_port": "/dev/ttyS6",
     "default_baudrate": 115200
   },
   "monitoring": {

@@ -28,7 +28,7 @@ class TestConfigManager:
         config = ConfigManager()
         
         # Test serial config
-        assert config.get('serial.default_port') == '/dev/ttyUSB0'
+        assert config.get('serial.default_port') == '/dev/ttyS6'
         assert config.get('serial.default_baudrate') == 115200
         assert config.get('serial.default_timeout') == 1.0
         
@@ -172,9 +172,9 @@ class TestSA5XController:
         """Test controller creation"""
         from utils.sa5x_controller import SA5XController
         
-        controller = SA5XController('/dev/ttyUSB0', 115200, 1.0)
+        controller = SA5XController('/dev/ttyS6', 115200, 1.0)
         assert controller is not None
-        assert controller.port == '/dev/ttyUSB0'
+        assert controller.port == '/dev/ttyS6'
         assert controller.baudrate == 115200
         assert controller.timeout == 1.0
     
@@ -182,7 +182,7 @@ class TestSA5XController:
         """Test status code mapping"""
         from utils.sa5x_controller import SA5XController
         
-        controller = SA5XController('/dev/ttyUSB0')
+        controller = SA5XController('/dev/ttyS6')
         
         assert controller.STATUS_CODES[0x00] == 'OK'
         assert controller.STATUS_CODES[0x01] == 'LOCKED'
@@ -195,7 +195,7 @@ class TestSA5XController:
         """Test command definitions"""
         from utils.sa5x_controller import SA5XController
         
-        controller = SA5XController('/dev/ttyUSB0')
+        controller = SA5XController('/dev/ttyS6')
         
         assert 'GET_STATUS' in controller.COMMANDS
         assert 'GET_FREQ_ERROR' in controller.COMMANDS

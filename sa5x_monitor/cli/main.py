@@ -38,8 +38,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s --port /dev/ttyUSB0 --monitor
-  %(prog)s --port /dev/ttyUSB0 --holdover-test --duration 3600
+  %(prog)s --port /dev/ttyS6 --monitor
+  %(prog)s --port /dev/ttyS6 --holdover-test --duration 3600
   %(prog)s --parse-log holdover_log.txt
         """
     )

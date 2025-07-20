@@ -88,7 +88,7 @@ class SA5XWebMonitor:
             """Connect to SA5X"""
             try:
                 data = request.get_json()
-                port = data.get('port', '/dev/ttyUSB0')
+                port = data.get('port', '/dev/ttyS6')
                 baudrate = data.get('baudrate', 115200)
                 timeout = data.get('timeout', 1.0)
                 

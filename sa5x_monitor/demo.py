@@ -192,9 +192,9 @@ def show_usage():
     print("=" * 40)
     
     print("CLI Usage:")
-    print("  python run_cli.py --port /dev/ttyUSB0")
-    print("  python run_cli.py --port /dev/ttyUSB0 --monitor --interval 10")
-    print("  python run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 3600")
+    print("  python run_cli.py --port /dev/ttyS6")
+    print("  python run_cli.py --port /dev/ttyS6 --monitor --interval 10")
+    print("  python run_cli.py --port /dev/ttyS6 --holdover-test --duration 3600")
     print("  python run_cli.py --parse-log examples/sample_holdover_log.txt")
     
     print("\nWeb Usage:")

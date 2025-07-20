@@ -23,13 +23,13 @@ python -m pytest tests/test_basic.py -v
 python run_cli.py --help
 
 # Показать текущий статус SA5X
-python run_cli.py --port /dev/ttyUSB0
+python run_cli.py --port /dev/ttyS6
 
 # Запустить мониторинг
-python run_cli.py --port /dev/ttyUSB0 --monitor --interval 10
+python run_cli.py --port /dev/ttyS6 --monitor --interval 10
 
 # Запустить тест holdover
-python run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 3600 --interval 10
+python run_cli.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10
 
 # Анализ существующего лога
 python run_cli.py --parse-log examples/sample_holdover_log.txt
@@ -106,7 +106,7 @@ pip install -r requirements.txt
 ```json
 {
   "serial": {
-    "default_port": "/dev/ttyUSB0",
+    "default_port": "/dev/ttyS6",
     "default_baudrate": 115200
   },
   "web_interface": {
@@ -147,23 +147,23 @@ ls /dev/tty*
 python run_cli.py --help
 
 # Показать статус SA5X
-python run_cli.py --port /dev/ttyUSB0
+python run_cli.py --port /dev/ttyS6
 
 # Запустить мониторинг на 1 минуту
-python run_cli.py --port /dev/ttyUSB0 --monitor --interval 5
+python run_cli.py --port /dev/ttyS6 --monitor --interval 5
 ```
 
 #### Тестирование holdover
 
 ```bash
 # Короткий тест (5 минут)
-python run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 300 --interval 10
+python run_cli.py --port /dev/ttyS6 --holdover-test --duration 300 --interval 10
 
 # Длинный тест (1 час)
-python run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 3600 --interval 10
+python run_cli.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10
 
 # Очень длинный тест (24 часа)
-python run_cli.py --port /dev/ttyUSB0 --holdover-test --duration 86400 --interval 60
+python run_cli.py --port /dev/ttyS6 --holdover-test --duration 86400 --interval 60
 ```
 
 #### Анализ логов
@@ -211,10 +211,10 @@ python run_web.py --debug
 ls /dev/tty*
 
 # Проверка прав доступа
-ls -l /dev/ttyUSB0
+ls -l /dev/ttyS6
 
 # Добавление прав
-sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyS6
 ```
 
 ### Проблемы с зависимостями
@@ -242,7 +242,7 @@ python run_web.py --port 8081
 
 ```bash
 # Включение подробного вывода
-python run_cli.py --verbose --port /dev/ttyUSB0
+python run_cli.py --verbose --port /dev/ttyS6
 
 # Просмотр логов
 tail -f sa5x_monitor.log

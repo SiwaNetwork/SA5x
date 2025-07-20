@@ -25,7 +25,7 @@ class ConfigManager:
         """Load default configuration"""
         return {
             'serial': {
-                'default_port': '/dev/ttyUSB0',
+                'default_port': '/dev/ttyS6',
                 'default_baudrate': 115200,
                 'default_timeout': 1.0,
                 'retry_attempts': 3,

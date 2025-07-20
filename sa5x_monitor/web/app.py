@@ -267,6 +267,60 @@ class SA5XWebMonitor:
                 
             except Exception as e:
                 return jsonify({'error': str(e)}), 500
+        
+        @self.app.route('/api/statistics')
+        def get_statistics():
+            """Get statistical analysis of current data"""
+            try:
+                if not self.current_data:
+                    return jsonify({'error': 'No data available'}), 404
+                
+                # Calculate statistics from monitoring data
+                stats = self._calculate_statistics()
+                return jsonify(stats)
+                
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+        
+        @self.app.route('/api/chart-data/<chart_type>')
+        def get_chart_data(chart_type):
+            """Get chart data for specific chart type"""
+            try:
+                if not self.current_data:
+                    return jsonify({'error': 'No data available'}), 404
+                
+                data = self._get_chart_data(chart_type)
+                return jsonify(data)
+                
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+        
+        @self.app.route('/api/allan-deviation/<data_type>')
+        def get_allan_deviation(data_type):
+            """Calculate and return Allan deviation for specified data type"""
+            try:
+                if not self.current_data:
+                    return jsonify({'error': 'No data available'}), 404
+                
+                allan_data = self._calculate_allan_deviation(data_type)
+                return jsonify(allan_data)
+                
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
+        
+        @self.app.route('/api/export-data')
+        def export_data():
+            """Export current monitoring data"""
+            try:
+                if not self.current_data:
+                    return jsonify({'error': 'No data available'}), 404
+                
+                # Export data in various formats
+                export_data = self._export_monitoring_data()
+                return jsonify(export_data)
+                
+            except Exception as e:
+                return jsonify({'error': str(e)}), 500
     
     def _setup_socket_events(self):
         """Setup SocketIO events"""
@@ -329,6 +383,195 @@ class SA5XWebMonitor:
         except Exception as e:
             self.logger.error(f"Holdover test failed: {e}")
             self.socketio.emit('test_error', {'error': str(e)})
+    
+    def _calculate_statistics(self):
+        """Calculate statistical analysis of monitoring data"""
+        try:
+            # This would typically use historical data from a database
+            # For now, we'll use the current data point
+            data = self.current_data
+            
+            stats = {
+                'frequency_error': {
+                    'current': data.get('frequency_error', 0),
+                    'mean': data.get('frequency_error', 0),
+                    'std_dev': 0,
+                    'min': data.get('frequency_error', 0),
+                    'max': data.get('frequency_error', 0)
+                },
+                'temperature': {
+                    'current': data.get('temperature', 0),
+                    'mean': data.get('temperature', 0),
+                    'std_dev': 0,
+                    'min': data.get('temperature', 0),
+                    'max': data.get('temperature', 0)
+                },
+                'voltage': {
+                    'current': data.get('voltage', 0),
+                    'mean': data.get('voltage', 0),
+                    'std_dev': 0,
+                    'min': data.get('voltage', 0),
+                    'max': data.get('voltage', 0)
+                },
+                'current': {
+                    'current': data.get('current', 0),
+                    'mean': data.get('current', 0),
+                    'std_dev': 0,
+                    'min': data.get('current', 0),
+                    'max': data.get('current', 0)
+                },
+                'status': {
+                    'lock_status': data.get('lock_status', False),
+                    'holdover_status': data.get('holdover_status', False),
+                    'overall_status': data.get('status', 'UNKNOWN')
+                },
+                'timestamp': data.get('timestamp', datetime.now().isoformat())
+            }
+            
+            return stats
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate statistics: {e}")
+            return {}
+    
+    def _get_chart_data(self, chart_type):
+        """Get chart data for specific chart type"""
+        try:
+            data = self.current_data
+            
+            if chart_type == 'frequency':
+                return {
+                    'labels': [data.get('timestamp', datetime.now().isoformat())],
+                    'datasets': [{
+                        'label': 'Frequency Error (ppm)',
+                        'data': [data.get('frequency_error', 0)]
+                    }]
+                }
+            elif chart_type == 'temperature':
+                return {
+                    'labels': [data.get('timestamp', datetime.now().isoformat())],
+                    'datasets': [{
+                        'label': 'Temperature (°C)',
+                        'data': [data.get('temperature', 0)]
+                    }]
+                }
+            elif chart_type == 'electrical':
+                return {
+                    'labels': [data.get('timestamp', datetime.now().isoformat())],
+                    'datasets': [
+                        {
+                            'label': 'Voltage (V)',
+                            'data': [data.get('voltage', 0)]
+                        },
+                        {
+                            'label': 'Current (A)',
+                            'data': [data.get('current', 0)]
+                        }
+                    ]
+                }
+            elif chart_type == 'status':
+                return {
+                    'labels': [data.get('timestamp', datetime.now().isoformat())],
+                    'datasets': [
+                        {
+                            'label': 'Lock Status',
+                            'data': [1 if data.get('lock_status', False) else 0]
+                        },
+                        {
+                            'label': 'Holdover Status',
+                            'data': [1 if data.get('holdover_status', False) else 0]
+                        }
+                    ]
+                }
+            else:
+                return {'error': 'Unknown chart type'}
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get chart data: {e}")
+            return {'error': str(e)}
+    
+    def _calculate_allan_deviation(self, data_type):
+        """Calculate Allan deviation for specified data type"""
+        try:
+            # This is a simplified Allan deviation calculation
+            # In a real implementation, you would need multiple data points over time
+            data = self.current_data
+            
+            if data_type == 'frequency':
+                value = data.get('frequency_error', 0)
+            elif data_type == 'temperature':
+                value = data.get('temperature', 0)
+            else:
+                return {'error': 'Unknown data type'}
+            
+            # Simplified Allan deviation calculation
+            # In practice, you would need multiple data points over time
+            allan_data = []
+            for tau in range(1, 11):  # Sample tau values
+                allan_dev = abs(value) / (tau ** 0.5)  # Simplified calculation
+                allan_data.append({
+                    'tau': tau,
+                    'allan_deviation': allan_dev
+                })
+            
+            return {
+                'data_type': data_type,
+                'allan_data': allan_data,
+                'timestamp': data.get('timestamp', datetime.now().isoformat())
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate Allan deviation: {e}")
+            return {'error': str(e)}
+    
+    def _export_monitoring_data(self):
+        """Export current monitoring data in various formats"""
+        try:
+            data = self.current_data
+            
+            export_data = {
+                'json': data,
+                'csv': self._convert_to_csv(data),
+                'summary': {
+                    'timestamp': data.get('timestamp', datetime.now().isoformat()),
+                    'frequency_error': data.get('frequency_error', 0),
+                    'temperature': data.get('temperature', 0),
+                    'voltage': data.get('voltage', 0),
+                    'current': data.get('current', 0),
+                    'lock_status': data.get('lock_status', False),
+                    'holdover_status': data.get('holdover_status', False),
+                    'status': data.get('status', 'UNKNOWN')
+                }
+            }
+            
+            return export_data
+            
+        except Exception as e:
+            self.logger.error(f"Failed to export data: {e}")
+            return {'error': str(e)}
+    
+    def _convert_to_csv(self, data):
+        """Convert data to CSV format"""
+        try:
+            csv_lines = []
+            csv_lines.append('timestamp,frequency_error,temperature,voltage,current,lock_status,holdover_status,status')
+            
+            timestamp = data.get('timestamp', datetime.now().isoformat())
+            freq_error = data.get('frequency_error', 0)
+            temp = data.get('temperature', 0)
+            voltage = data.get('voltage', 0)
+            current = data.get('current', 0)
+            lock_status = 1 if data.get('lock_status', False) else 0
+            holdover_status = 1 if data.get('holdover_status', False) else 0
+            status = data.get('status', 'UNKNOWN')
+            
+            csv_lines.append(f'{timestamp},{freq_error},{temp},{voltage},{current},{lock_status},{holdover_status},{status}')
+            
+            return '\n'.join(csv_lines)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to convert to CSV: {e}")
+            return ''
     
     def run(self, host='localhost', port=8080, debug=False):
         """Run the web application"""

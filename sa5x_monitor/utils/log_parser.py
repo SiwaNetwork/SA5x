@@ -20,16 +20,16 @@ class LogParser:
         # Common log formats
         self.log_patterns = [
             # Format: timestamp,freq_error,temperature,voltage,current,status
-            r'^(\d+\.?\d*),([+-]?\d+\.?\d*),([+-]?\d+\.?\d*),([+-]?\d+\.?\d*),([+-]?\d+\.?\d*),(\w+)$',
+            r'^(\d+\.?\d*),([+-]?\d+\.?\d*(?:[eE][+-]?\d+)?),([+-]?\d+\.?\d*),([+-]?\d+\.?\d*),([+-]?\d+\.?\d*),(\w+)$',
             
             # Format: timestamp freq_error temperature voltage current status
-            r'^(\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+(\w+)$',
+            r'^(\d+\.?\d*)\s+([+-]?\d+\.?\d*(?:[eE][+-]?\d+)?)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+(\w+)$',
             
             # Format: [timestamp] freq_error temp voltage current status
-            r'^\[(\d+\.?\d*)\]\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+(\w+)$',
+            r'^\[(\d+\.?\d*)\]\s+([+-]?\d+\.?\d*(?:[eE][+-]?\d+)?)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s+(\w+)$',
             
             # Format: timestamp: freq_error, temp, voltage, current, status
-            r'^(\d+\.?\d*):\s*([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*),\s*(\w+)$'
+            r'^(\d+\.?\d*):\s*([+-]?\d+\.?\d*(?:[eE][+-]?\d+)?),\s*([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*),\s*([+-]?\d+\.?\d*),\s*(\w+)$'
         ]
     
     def parse_holdover_log(self, log_file: str) -> Dict[str, Any]:

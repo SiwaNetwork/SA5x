@@ -461,12 +461,44 @@ class SA5XMonitor {
     }
     
     updateAllanChart(type) {
-        // Calculate Allan deviation for the specified type
-        const data = type === 'frequency' ? this.dataHistory.frequency_error : this.dataHistory.temperature;
-        const allanData = this.calculateAllanDeviation(data);
-        
-        this.charts.allan.data.datasets[0].data = allanData;
-        this.charts.allan.update();
+        // Try to get Allan deviation data from server
+        this.fetchAllanDeviationData(type);
+    }
+    
+    async fetchAllanDeviationData(type) {
+        try {
+            const response = await fetch(`/api/allan-deviation/${type}`);
+            const data = await response.json();
+            
+            if (response.ok && data.allan_data) {
+                // Update Allan chart with server data
+                this.charts.allan.data.datasets[0].data = data.allan_data;
+                this.charts.allan.data.datasets[0].label = `${type.charAt(0).toUpperCase() + type.slice(1)} Allan Deviation`;
+                this.charts.allan.update();
+                
+                // Show source information
+                if (data.source === 'uploaded_log') {
+                    this.showSuccess(`Allan deviation calculated from uploaded log (${data.total_measurements} measurements, ${data.duration.toFixed(0)}s duration)`);
+                }
+            } else {
+                // Fallback to local calculation if no server data
+                const localData = type === 'frequency' ? this.dataHistory.frequency_error : this.dataHistory.temperature;
+                const allanData = this.calculateAllanDeviation(localData);
+                
+                this.charts.allan.data.datasets[0].data = allanData;
+                this.charts.allan.data.datasets[0].label = `${type.charAt(0).toUpperCase() + type.slice(1)} Allan Deviation (Local)`;
+                this.charts.allan.update();
+            }
+        } catch (error) {
+            console.error('Failed to fetch Allan deviation data:', error);
+            // Fallback to local calculation
+            const localData = type === 'frequency' ? this.dataHistory.frequency_error : this.dataHistory.temperature;
+            const allanData = this.calculateAllanDeviation(localData);
+            
+            this.charts.allan.data.datasets[0].data = allanData;
+            this.charts.allan.data.datasets[0].label = `${type.charAt(0).toUpperCase() + type.slice(1)} Allan Deviation (Local)`;
+            this.charts.allan.update();
+        }
     }
     
     calculateAllanDeviation(data) {
@@ -1022,9 +1054,63 @@ class SA5XMonitor {
                     </div>
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h6>Temperature Analysis</h6>
+                    <div class="result-item">
+                        <span class="result-label">Temperature Stability:</span>
+                        <span class="result-value">${results.temp_stability.toFixed(3)}°C</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Temperature Range:</span>
+                        <span class="result-value">${results.temp_min.toFixed(2)}°C to ${results.temp_max.toFixed(2)}°C</span>
+                    </div>
+                </div>
+            </div>
         `;
         
         container.style.display = 'block';
+        
+        // Update charts with uploaded log data
+        this.updateChartsFromUploadedLog();
+    }
+    
+    updateChartsFromUploadedLog() {
+        // Update frequency chart
+        this.fetchChartData('frequency');
+        this.fetchChartData('temperature');
+        this.fetchChartData('electrical');
+        
+        // Update Allan deviation chart
+        this.fetchAllanDeviationData('frequency');
+    }
+    
+    async fetchChartData(chartType) {
+        try {
+            const response = await fetch(`/api/chart-data/${chartType}`);
+            const data = await response.json();
+            
+            if (response.ok && data.labels && data.datasets) {
+                // Update the appropriate chart based on chart type
+                if (chartType === 'frequency') {
+                    this.charts.frequency.data.labels = data.labels;
+                    this.charts.frequency.data.datasets[0].data = data.datasets[0].data;
+                    this.charts.frequency.update();
+                } else if (chartType === 'temperature') {
+                    // Temperature data might be shown in main chart
+                    this.charts.main.data.labels = data.labels;
+                    this.charts.main.data.datasets[1].data = data.datasets[0].data;
+                    this.charts.main.update();
+                } else if (chartType === 'electrical') {
+                    this.charts.tempElectrical.data.labels = data.labels;
+                    this.charts.tempElectrical.data.datasets[0].data = data.datasets[0].data;
+                    this.charts.tempElectrical.data.datasets[1].data = data.datasets[1].data;
+                    this.charts.tempElectrical.update();
+                }
+            }
+        } catch (error) {
+            console.error(`Failed to fetch ${chartType} chart data:`, error);
+        }
     }
     
     downloadResults() {

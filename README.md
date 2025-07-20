@@ -18,7 +18,7 @@ A Python program for communicating with the Microchip SA5X atomic clock module v
 pip install -r requirements.txt
 ```
 
-2. Ensure you have access to the serial port (typically `/dev/ttyUSB0` on Linux)
+2. Ensure you have access to the serial port (typically `/dev/ttyS6` on Linux)
 
 ## Usage
 
@@ -112,7 +112,7 @@ The program supports the minimum configuration as specified:
 ## Configuration
 
 ### Serial Port Settings
-- **Default Port**: `/dev/ttyUSB0`
+- **Default Port**: `/dev/ttyS6`
 - **Default Baudrate**: 57600
 - **Data Bits**: 8
 - **Parity**: None
@@ -121,7 +121,7 @@ The program supports the minimum configuration as specified:
 
 ### Custom Port/Baudrate
 ```bash
-python sa5x_controller.py --port /dev/ttyUSB1 --baudrate 115200 --status
+python sa5x_controller.py --port /dev/ttyS7 --baudrate 115200 --status
 ```
 
 ## Program Structure
@@ -159,7 +159,7 @@ When using interactive mode, you can use these commands:
 from sa5x_controller import SA5XController
 
 # Create controller
-controller = SA5XController(port="/dev/ttyUSB0", baudrate=57600)
+controller = SA5XController(port="/dev/ttyS6", baudrate=57600)
 
 # Connect
 if controller.connect():
@@ -190,8 +190,8 @@ if controller.connect():
 ## Troubleshooting
 
 ### Connection Issues
-1. Check if the serial port exists: `ls /dev/ttyUSB*`
-2. Verify permissions: `sudo chmod 666 /dev/ttyUSB0`
+1. Check if the serial port exists: `ls /dev/ttyS*`
+2. Verify permissions: `sudo chmod 666 /dev/ttyS6`
 3. Check if another program is using the port
 4. Try different baudrates if needed
 

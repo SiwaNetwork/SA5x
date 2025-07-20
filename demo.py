@@ -13,7 +13,7 @@ def demo_basic_usage():
     print("=== SA5X Controller Demo ===\n")
     
     # Create controller instance
-    controller = SA5XController(port="/dev/ttyUSB0", baudrate=57600)
+    controller = SA5XController(port="/dev/ttyS6", baudrate=57600)
     
     print("1. Creating SA5X controller instance")
     print(f"   Port: {controller.port}")
@@ -96,7 +96,7 @@ def demo_python_usage():
 from sa5x_controller import SA5XController
 
 # Create controller
-controller = SA5XController(port="/dev/ttyUSB0", baudrate=57600)
+controller = SA5XController(port="/dev/ttyS6", baudrate=57600)
 
 # Connect to device
 if controller.connect():

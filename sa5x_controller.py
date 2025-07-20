@@ -14,7 +14,7 @@ from typing import Optional, Dict, Any
 class SA5XController:
     """Controller class for SA5X atomic clock module"""
     
-    def __init__(self, port: str = "/dev/ttyUSB0", baudrate: int = 57600, timeout: float = 1.0):
+    def __init__(self, port: str = "/dev/ttyS6", baudrate: int = 57600, timeout: float = 1.0):
         """
         Initialize SA5X controller
         
@@ -195,7 +195,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="SA5X Atomic Clock Controller")
-    parser.add_argument("--port", default="/dev/ttyUSB0", help="Serial port")
+    parser.add_argument("--port", default="/dev/ttyS6", help="Serial port")
     parser.add_argument("--baudrate", type=int, default=57600, help="Baud rate")
     parser.add_argument("--command", help="Single command to execute")
     parser.add_argument("--get", help="Get parameter value")

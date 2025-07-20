@@ -20,7 +20,7 @@ class TestSA5XController(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures"""
-        self.controller = SA5XController(port="/dev/ttyUSB0", baudrate=57600)
+        self.controller = SA5XController(port="/dev/ttyS6", baudrate=57600)
     
     @patch('serial.Serial')
     def test_connect_success(self, mock_serial):

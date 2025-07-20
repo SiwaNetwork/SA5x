@@ -1,0 +1,60 @@
+{
+  "serial": {
+    "default_port": "/dev/ttyUSB0",
+    "default_baudrate": 115200,
+    "default_timeout": 1.0,
+    "retry_attempts": 3,
+    "retry_delay": 1.0
+  },
+  "monitoring": {
+    "default_interval": 10,
+    "max_interval": 3600,
+    "min_interval": 1,
+    "log_enabled": true,
+    "log_level": "INFO"
+  },
+  "holdover_test": {
+    "min_duration": 300,
+    "max_duration": 86400,
+    "default_duration": 3600,
+    "min_interval": 1,
+    "max_interval": 60,
+    "default_interval": 10,
+    "auto_start_holdover": true,
+    "auto_stop_holdover": true
+  },
+  "analysis": {
+    "allan_deviation_taus": [1, 10, 100, 1000],
+    "frequency_stability_threshold": 1e-9,
+    "temperature_stability_threshold": 0.1,
+    "enable_advanced_analysis": true
+  },
+  "output": {
+    "default_output_dir": "results",
+    "save_json": true,
+    "save_summary": true,
+    "save_plots": true,
+    "timestamp_format": "%Y%m%d_%H%M%S"
+  },
+  "web_interface": {
+    "host": "localhost",
+    "port": 8080,
+    "debug": false,
+    "auto_reload": true,
+    "max_connections": 10
+  },
+  "alerts": {
+    "enable_alerts": true,
+    "frequency_error_threshold": 1e-8,
+    "temperature_threshold": 50.0,
+    "voltage_threshold": 15.0,
+    "current_threshold": 2.0,
+    "status_alerts": ["ERROR", "NOT_LOCKED"]
+  },
+  "logging": {
+    "log_file": "sa5x_monitor.log",
+    "max_log_size": 10485760,
+    "backup_count": 5,
+    "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}

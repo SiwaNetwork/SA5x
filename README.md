@@ -1,77 +1,77 @@
-# SA5X Atomic Clock Controller
+# SA5X Контроллер Атомных Часов
 
-A Python program for communicating with the Microchip SA5X atomic clock module via serial interface.
+Программа на Python для связи с модулем атомных часов Microchip SA5X через последовательный интерфейс.
 
-## Features
+## Возможности
 
-- Serial communication with SA5X module at 57600 baud (default)
-- Support for all commands provided in the SA5X datasheet
-- Command-line interface with multiple operation modes
-- Interactive mode for real-time control
-- Comprehensive status monitoring
-- Automatic configuration application
+- Последовательная связь с модулем SA5X на скорости 57600 бод (по умолчанию)
+- Поддержка всех команд, предоставленных в документации SA5X
+- Интерфейс командной строки с несколькими режимами работы
+- Интерактивный режим для управления в реальном времени
+- Комплексный мониторинг статуса
+- Автоматическое применение конфигурации
 
-## Installation
+## Установка
 
-1. Install Python dependencies:
+1. Установите зависимости Python:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Ensure you have access to the serial port (typically `/dev/ttyS6` on Linux)
+2. Убедитесь, что у вас есть доступ к последовательному порту (обычно `/dev/ttyS6` на Linux)
 
-## Usage
+## Использование
 
-### Command Line Interface
+### Интерфейс командной строки
 
-The main program provides several operation modes:
+Основная программа предоставляет несколько режимов работы:
 
-#### Get Parameter Value
+#### Получить значение параметра
 ```bash
 python sa5x_controller.py --get PpsOffset
 ```
 
-#### Set Parameter Value
+#### Установить значение параметра
 ```bash
 python sa5x_controller.py --set PpsOffset -30
 ```
 
-#### Execute Single Command
+#### Выполнить одну команду
 ```bash
 python sa5x_controller.py --command "{get,Disciplining}"
 ```
 
-#### Get Full Status
+#### Получить полный статус
 ```bash
 python sa5x_controller.py --status
 ```
 
-#### Apply Minimum Configuration
+#### Применить минимальную конфигурацию
 ```bash
 python sa5x_controller.py --min-config
 ```
 
-#### Interactive Mode
+#### Интерактивный режим
 ```bash
 python sa5x_controller.py --interactive
 ```
 
-### Example Script
+### Пример скрипта
 
-Run the example script to see all commands in action:
+Запустите пример скрипта, чтобы увидеть все команды в действии:
 ```bash
 python sa5x_examples.py
 ```
 
-For interactive demo:
+Для интерактивной демонстрации:
 ```bash
 python sa5x_examples.py interactive
 ```
 
-## Supported Commands
+## Поддерживаемые команды
 
-### Minimum Necessary Configuration
-The program supports the minimum configuration as specified:
+### Минимальная необходимая конфигурация
+Программа поддерживает минимальную конфигурацию, как указано:
 
 ```
 {set,Disciplining,1}
@@ -82,135 +82,135 @@ The program supports the minimum configuration as specified:
 {store}
 ```
 
-### Get Commands
-- `{get,PpsOffset}` - Get PPS offset
-- `{get,DisciplineLocked}` - Check if discipline is locked
-- `{get,Locked}` - Check if locked
-- `{get,Disciplining}` - Get disciplining status
-- `{get,Phase}` - Get phase information
-- `{get,TauPps0}` - Get Tau for PPS0
-- `{get,DigitalTuning}` - Get digital tuning status
-- `{get,JamSyncing}` - Get jam syncing status
-- `{get,PhaseLimit}` - Get phase limit
-- `{get,DisciplineThresholdPps0}` - Get discipline threshold
-- `{get,PpsInDetected}` - Check if PPS input detected
-- `{get,LockProgress}` - Get lock progress
-- `{get,PpsSource}` - Get PPS source
-- `{get,LastCorrection}` - Get last correction
+### Команды получения
+- `{get,PpsOffset}` - Получить смещение PPS
+- `{get,DisciplineLocked}` - Проверить, заблокирована ли дисциплина
+- `{get,Locked}` - Проверить, заблокировано ли
+- `{get,Disciplining}` - Получить статус дисциплины
+- `{get,Phase}` - Получить информацию о фазе
+- `{get,TauPps0}` - Получить Tau для PPS0
+- `{get,DigitalTuning}` - Получить статус цифровой настройки
+- `{get,JamSyncing}` - Получить статус синхронизации Jam
+- `{get,PhaseLimit}` - Получить лимит фазы
+- `{get,DisciplineThresholdPps0}` - Получить порог дисциплины
+- `{get,PpsInDetected}` - Проверить, обнаружен ли вход PPS
+- `{get,LockProgress}` - Получить прогресс блокировки
+- `{get,PpsSource}` - Получить источник PPS
+- `{get,LastCorrection}` - Получить последнюю коррекцию
 
-### Set Commands
-- `{set,PpsOffset,value}` - Set PPS offset
-- `{set,PpsWidth,value}` - Set PPS pulse width
-- `{set,Disciplining,value}` - Enable/disable disciplining
-- `{set,TauPps0,value}` - Set Tau for PPS0
-- `{set,PhaseLimit,value}` - Set phase limit
-- `{set,DisciplineThresholdPps0,value}` - Set discipline threshold
+### Команды установки
+- `{set,PpsOffset,value}` - Установить смещение PPS
+- `{set,PpsWidth,value}` - Установить ширину импульса PPS
+- `{set,Disciplining,value}` - Включить/выключить дисциплину
+- `{set,TauPps0,value}` - Установить Tau для PPS0
+- `{set,PhaseLimit,value}` - Установить лимит фазы
+- `{set,DisciplineThresholdPps0,value}` - Установить порог дисциплины
 
-### Store Command
-- `{store}` - Store configuration to flash memory
+### Команда сохранения
+- `{store}` - Сохранить конфигурацию во флэш-память
 
-## Configuration
+## Конфигурация
 
-### Serial Port Settings
-- **Default Port**: `/dev/ttyS6`
-- **Default Baudrate**: 57600
-- **Data Bits**: 8
-- **Parity**: None
-- **Stop Bits**: 1
-- **Timeout**: 1 second
+### Настройки последовательного порта
+- **Порт по умолчанию**: `/dev/ttyS6`
+- **Скорость по умолчанию**: 57600
+- **Биты данных**: 8
+- **Четность**: Нет
+- **Стоп-биты**: 1
+- **Таймаут**: 1 секунда
 
-### Custom Port/Baudrate
+### Пользовательский порт/скорость
 ```bash
 python sa5x_controller.py --port /dev/ttyS7 --baudrate 115200 --status
 ```
 
-## Program Structure
+## Структура программы
 
-### SA5XController Class
-The main controller class provides:
+### Класс SA5XController
+Основной класс контроллера предоставляет:
 
-- **Connection Management**: `connect()`, `disconnect()`
-- **Command Interface**: `send_command()`, `get_parameter()`, `set_parameter()`
-- **Configuration**: `store_configuration()`, `apply_minimum_configuration()`
-- **Status Monitoring**: `get_status()`
-- **Convenience Methods**: `enable_disciplining()`, `set_pps_offset()`, etc.
+- **Управление соединением**: `connect()`, `disconnect()`
+- **Интерфейс команд**: `send_command()`, `get_parameter()`, `set_parameter()`
+- **Конфигурация**: `store_configuration()`, `apply_minimum_configuration()`
+- **Мониторинг статуса**: `get_status()`
+- **Удобные методы**: `enable_disciplining()`, `set_pps_offset()`, и т.д.
 
-### Error Handling
-- Serial connection errors
-- Command timeout handling
-- Parameter validation
-- Graceful disconnection
+### Обработка ошибок
+- Ошибки последовательного соединения
+- Обработка таймаутов команд
+- Валидация параметров
+- Корректное отключение
 
-## Interactive Mode Commands
+## Команды интерактивного режима
 
-When using interactive mode, you can use these commands:
+При использовании интерактивного режима вы можете использовать эти команды:
 
-- `get <parameter>` - Get parameter value
-- `set <parameter> <value>` - Set parameter value
-- `status` - Show all parameters
-- `min-config` - Apply minimum configuration
-- `store` - Store configuration
-- `quit` - Exit
+- `get <parameter>` - Получить значение параметра
+- `set <parameter> <value>` - Установить значение параметра
+- `status` - Показать все параметры
+- `min-config` - Применить минимальную конфигурацию
+- `store` - Сохранить конфигурацию
+- `quit` - Выйти
 
-## Examples
+## Примеры
 
-### Basic Usage
+### Базовое использование
 ```python
 from sa5x_controller import SA5XController
 
-# Create controller
+# Создать контроллер
 controller = SA5XController(port="/dev/ttyS6", baudrate=57600)
 
-# Connect
+# Подключиться
 if controller.connect():
-    # Get parameter
+    # Получить параметр
     offset = controller.get_parameter("PpsOffset")
-    print(f"PPS Offset: {offset}")
+    print(f"Смещение PPS: {offset}")
     
-    # Set parameter
+    # Установить параметр
     controller.set_parameter("PpsOffset", -30)
     
-    # Store configuration
+    # Сохранить конфигурацию
     controller.store_configuration()
     
-    # Disconnect
+    # Отключиться
     controller.disconnect()
 ```
 
-### Apply Minimum Configuration
+### Применить минимальную конфигурацию
 ```python
 controller = SA5XController()
 if controller.connect():
     success = controller.apply_minimum_configuration()
     if success:
-        print("Configuration applied successfully")
+        print("Конфигурация успешно применена")
     controller.disconnect()
 ```
 
-## Troubleshooting
+## Устранение неполадок
 
-### Connection Issues
-1. Check if the serial port exists: `ls /dev/ttyS*`
-2. Verify permissions: `sudo chmod 666 /dev/ttyS6`
-3. Check if another program is using the port
-4. Try different baudrates if needed
+### Проблемы с подключением
+1. Проверьте, существует ли последовательный порт: `ls /dev/ttyS*`
+2. Проверьте права доступа: `sudo chmod 666 /dev/ttyS6`
+3. Проверьте, не использует ли другой программой порт
+4. Попробуйте другие скорости, если необходимо
 
-### Command Issues
-1. Ensure proper command format: `{get,ParameterName}`
-2. Check parameter names match SA5X datasheet
-3. Verify numeric values are within valid ranges
+### Проблемы с командами
+1. Убедитесь в правильном формате команды: `{get,ParameterName}`
+2. Проверьте, что имена параметров соответствуют документации SA5X
+3. Убедитесь, что числовые значения находятся в допустимых диапазонах
 
-### Permission Issues
+### Проблемы с правами доступа
 ```bash
 sudo usermod -a -G dialout $USER
-# Then log out and back in
+# Затем выйдите и войдите снова
 ```
 
-## References
+## Ссылки
 
-- [SA5X User Guide](http://ww1.microchip.com/downloads/en/DeviceDoc/Miniature-Atomic-Clock-MAC-SA5X-Users-Guide-DS50002938A.pdf)
-- [Microchip SA5X Product Page](https://www.microchip.com/en-us/product/SA5X)
+- [Руководство пользователя SA5X](http://ww1.microchip.com/downloads/en/DeviceDoc/Miniature-Atomic-Clock-MAC-SA5X-Users-Guide-DS50002938A.pdf)
+- [Страница продукта Microchip SA5X](https://www.microchip.com/en-us/product/SA5X)
 
-## License
+## Лицензия
 
-This program is provided as-is for educational and development purposes.
+Эта программа предоставляется как есть для образовательных и разработческих целей.

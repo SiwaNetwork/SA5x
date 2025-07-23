@@ -99,3 +99,7 @@
 2025-07-20 17:31:43,742 - utils.log_parser - WARNING - Could not parse line 101: 980,1.22e-04,25.2,12.0,0.15,LOCKED
 2025-07-20 17:31:43,742 - utils.log_parser - WARNING - Could not parse line 102: 990,1.25e-04,25.1,12.0,0.15,LOCKED
 2025-07-20 17:31:43,742 - utils.log_parser - WARNING - Could not parse line 103: 1000,1.26e-04,25.2,12.0,0.15,LOCKED
+2025-07-23 15:03:27,305 - web.app - INFO - Starting SA5X Web Monitor on localhost:8080
+2025-07-23 15:03:27,308 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:8080
+2025-07-23 15:03:27,308 - werkzeug - INFO - [33mPress CTRL+C to quit[0m

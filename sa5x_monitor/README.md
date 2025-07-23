@@ -1,229 +1,241 @@
 # SA5X Rubidium Generator Monitor
 
-Программа мониторинга и тестирования рубидиевого генератора SA5X, основанная на проектах Time-Card и Timetickler.
+A comprehensive monitoring and testing suite for SA5X Rubidium frequency generators, providing both command-line and web-based interfaces for real-time monitoring, holdover testing, and data analysis.
 
-## Возможности
+## Features
 
-### CLI Версия
-- **Мониторинг в реальном времени**: Непрерывное отслеживание параметров SA5X
-- **Тестирование holdover**: Автоматизированные тесты стабильности частоты
-- **Анализ логов**: Парсинг и анализ существующих файлов логов
-- **Конфигурация**: Гибкая настройка параметров через JSON файлы
+- **Real-time Monitoring**: Track generator status, frequency stability, and temperature
+- **Holdover Testing**: Automated testing with configurable duration and intervals
+- **Data Logging**: Comprehensive logging with CSV export capabilities
+- **Web Interface**: Real-time web dashboard with live charts and status updates
+- **Command-line Interface**: Full-featured CLI for automation and scripting
+- **Log Analysis**: Parse and analyze existing test logs with statistical metrics
 
-### Web Версия
-- **Веб-интерфейс**: Современный интерфейс с реальным временем
-- **Интерактивные графики**: Визуализация данных с помощью Chart.js
-- **Множественные графики**: Поддержка различных типов графиков
-- **Статистический анализ**: Расчет метрик в реальном времени
-- **Анализ Аллана**: Специализированный анализ стабильности частоты
-- **Управление тестами**: Запуск и мониторинг тестов через браузер
-- **Загрузка логов**: Анализ существующих файлов логов
-- **Экспорт данных**: Сохранение данных в различных форматах
+## Installation
 
-## Установка
+### Prerequisites
 
-### Требования
-- Python 3.8+
-- Доступ к последовательному порту (для подключения к SA5X)
+- Python 3.8 or higher
+- Serial port access (typically `/dev/ttyS6` for SA5X)
+- Linux/Unix environment (tested on Ubuntu)
 
-### Установка зависимостей
+### Setup
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd sa5x_monitor
+```
+
+2. Create and activate a virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Использование
-
-### CLI Версия
-
-#### Базовое использование
+4. Verify installation:
 ```bash
-# Показать текущий статус SA5X
-python cli/main.py --port /dev/ttyS6
-
-# Запустить мониторинг
-python cli/main.py --port /dev/ttyS6 --monitor --interval 10
-
-# Запустить тест holdover
-python cli/main.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10
-
-# Анализ существующего лога
-python cli/main.py --parse-log holdover_log.txt
+python test_setup.py
 ```
 
-#### Параметры командной строки
-- `--port`: Последовательный порт для подключения
-- `--baudrate`: Скорость передачи (по умолчанию: 115200)
-- `--timeout`: Таймаут соединения (по умолчанию: 1.0)
-- `--monitor`: Запустить непрерывный мониторинг
-- `--holdover-test`: Запустить тест holdover
-- `--duration`: Длительность теста в секундах (по умолчанию: 3600)
-- `--interval`: Интервал измерений в секундах (по умолчанию: 10)
-- `--output`: Файл для сохранения результатов
-- `--parse-log`: Анализ существующего файла лога
-- `--config`: Путь к файлу конфигурации
-- `--verbose`: Подробный вывод
+## Configuration
 
-### Web Версия
-
-#### Запуск веб-сервера
-```bash
-cd web
-python app.py
-```
-
-Веб-интерфейс будет доступен по адресу: http://localhost:8080
-
-#### Возможности веб-интерфейса
-1. **Подключение**: Настройка параметров соединения с SA5X
-2. **Мониторинг**: Запуск/остановка непрерывного мониторинга
-3. **Тестирование**: Управление тестами holdover
-4. **Визуализация**: Интерактивные графики в реальном времени
-5. **Анализ логов**: Загрузка и анализ существующих файлов
-6. **Конфигурация**: Управление настройками системы
-
-### Новые возможности графиков
-
-#### Типы графиков
-1. **График частотной стабильности**: Отслеживание ошибки частоты с трендом и скользящим средним
-2. **График температурной стабильности**: Мониторинг температуры с анализом теплового дрейфа
-3. **График электрических параметров**: Напряжение, ток и мощность питания
-4. **График статуса системы**: Состояние блокировки и holdover во времени
-5. **График отклонения Аллана**: Специализированный анализ стабильности частоты
-
-#### Статистический анализ
-- **Стандартное отклонение**: Мера кратковременной стабильности
-- **Скользящее среднее**: Сглаживание данных для выявления трендов
-- **Отклонение Аллана**: Стандартная метрика стабильности частоты
-- **Корреляционный анализ**: Связь между различными параметрами
-
-#### Режимы отображения
-- **Частота и Температура**: Основной режим для анализа стабильности
-- **Электрические параметры**: Мониторинг питания и энергопотребления
-- **Статус системы**: Анализ надежности и режимов работы
-- **Анализ Аллана**: Специализированный анализ для инженеров
-
-#### API для графиков
-- `/api/statistics` - Статистический анализ данных
-- `/api/chart-data/<chart_type>` - Данные для различных типов графиков
-- `/api/allan-deviation/<data_type>` - Расчет отклонения Аллана
-- `/api/export-data` - Экспорт данных в различных форматах
-
-## Структура проекта
-
-```
-sa5x_monitor/
-├── cli/                    # CLI версия
-│   └── main.py            # Основной CLI файл
-├── web/                   # Web версия
-│   ├── app.py            # Flask приложение
-│   ├── templates/        # HTML шаблоны
-│   └── static/           # Статические файлы (CSS, JS)
-├── utils/                 # Общие утилиты
-│   ├── sa5x_controller.py # Контроллер SA5X
-│   ├── holdover_test.py  # Тестирование holdover
-│   ├── log_parser.py     # Парсер логов
-│   └── config_manager.py # Менеджер конфигурации
-├── config/               # Конфигурационные файлы
-├── tests/                # Тесты
-├── requirements.txt      # Зависимости
-└── README.md            # Документация
-```
-
-## Конфигурация
-
-### Файл конфигурации
-По умолчанию используется `config/sa5x_config.json`:
+The default configuration is stored in `config/sa5x_config.json`:
 
 ```json
 {
-  "serial": {
-    "default_port": "/dev/ttyS6",
-    "default_baudrate": 115200,
-    "default_timeout": 1.0
-  },
-  "monitoring": {
-    "default_interval": 10,
-    "log_enabled": true
-  },
-  "holdover_test": {
-    "min_duration": 300,
-    "max_duration": 86400,
-    "default_duration": 3600
-  },
-  "web_interface": {
-    "host": "localhost",
-    "port": 8080
-  }
+    "serial": {
+        "default_port": "/dev/ttyS6",
+        "baudrate": 115200,
+        "timeout": 1.0
+    },
+    "monitoring": {
+        "default_interval": 10,
+        "buffer_size": 1000
+    },
+    "holdover_test": {
+        "default_duration": 3600,
+        "warmup_time": 300,
+        "measurement_interval": 10
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    },
+    "web": {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": false
+    }
 }
 ```
 
-## Протокол связи с SA5X
+## Usage
 
-Программа использует кастомный протокол связи с SA5X:
+### Command-Line Interface
 
-### Формат пакета
-```
-[START][LENGTH][COMMAND][DATA][CHECKSUM]
-```
-
-### Команды
-- `0x01`: Получить статус
-- `0x02`: Получить ошибку частоты
-- `0x03`: Получить температуру
-- `0x04`: Получить напряжение
-- `0x05`: Получить ток
-- `0x06`: Получить статус блокировки
-- `0x07`: Получить статус holdover
-- `0x08`: Запустить holdover
-- `0x09`: Остановить holdover
-
-## Анализ данных
-
-### Метрики стабильности частоты
-- **Стандартное отклонение**: Мера кратковременной стабильности
-- **Дрейф частоты**: Линейный тренд изменения частоты
-- **Отклонение Аллана**: Стандартная метрика стабильности частоты
-
-### Метрики температуры
-- **Стабильность температуры**: Стандартное отклонение температуры
-- **Дрейф температуры**: Линейный тренд изменения температуры
-
-## Примеры использования
-
-### Тест holdover на 1 час
+#### Basic Monitoring
 ```bash
-python cli/main.py --port /dev/ttyS6 --holdover-test --duration 3600 --interval 10 --output test_results.json
+# Start continuous monitoring with default port
+python run_cli.py --monitor
+
+# Specify a different port
+python run_cli.py --port /dev/ttyUSB0 --monitor
+
+# Enable verbose logging
+python run_cli.py --monitor --verbose
 ```
 
-### Мониторинг с интервалом 5 секунд
+#### Holdover Testing
 ```bash
-python cli/main.py --port /dev/ttyS6 --monitor --interval 5
+# Run a 1-hour holdover test
+python run_cli.py --holdover-test --duration 3600
+
+# Run with custom interval and output file
+python run_cli.py --holdover-test --duration 7200 --interval 5 --output results.csv
 ```
 
-### Анализ существующего лога
+#### Log Analysis
 ```bash
-python cli/main.py --parse-log holdover_test_20231201_143022.txt
+# Parse an existing holdover log
+python run_cli.py --parse-log holdover_20240723_170000.log
 ```
 
-## Разработка
-
-### Запуск тестов
+#### Help and Options
 ```bash
-pytest tests/
+python run_cli.py --help
 ```
 
-### Форматирование кода
+### Web Interface
+
+1. Start the web server:
 ```bash
-black sa5x_monitor/
-flake8 sa5x_monitor/
+python run_web.py
 ```
 
-## Лицензия
+2. Open your browser and navigate to:
+```
+http://localhost:5000
+```
 
-Проект основан на коде из:
-- [Time-Card](https://github.com/Time-Appliances-Project/Time-Card)
-- [Timetickler](https://github.com/Time-Appliances-Project/Time-Card/tree/master/OSC/Microchip/SA53)
+3. Features available in the web interface:
+   - Real-time status dashboard
+   - Live frequency and temperature charts
+   - Holdover test control and monitoring
+   - Historical data viewing
+   - Log file download
 
-## Поддержка
+## API Endpoints
 
-Для получения помощи или сообщения об ошибках, пожалуйста, создайте issue в репозитории проекта.
+The web interface provides several REST API endpoints:
+
+- `GET /api/status` - Current generator status
+- `GET /api/history` - Historical data (last 1000 points)
+- `POST /api/start_holdover` - Start holdover test
+- `POST /api/stop_holdover` - Stop holdover test
+- `GET /api/holdover_status` - Current holdover test status
+- `GET /api/logs` - List available log files
+- `GET /api/download_log/<filename>` - Download specific log file
+
+## Data Format
+
+### Status Response
+```json
+{
+    "timestamp": "2024-07-23 17:00:00",
+    "lock_status": "LOCKED",
+    "frequency_offset": 1.234e-10,
+    "temperature": 45.67,
+    "voltage": 12.34,
+    "current": 0.567,
+    "alarm_status": "NONE"
+}
+```
+
+### Holdover Test Results
+```json
+{
+    "duration": 3600,
+    "frequency_stability": 1.23e-11,
+    "allan_deviation": 4.56e-12,
+    "temperature_stability": 0.123,
+    "total_measurements": 360
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Serial Port Access Denied**
+   ```bash
+   sudo usermod -a -G dialout $USER
+   # Log out and back in for changes to take effect
+   ```
+
+2. **Port Not Found**
+   - Check available ports: `ls /dev/tty*`
+   - Verify SA5X connection and power
+   - Try different USB ports if using USB-to-serial adapter
+
+3. **Module Import Errors**
+   - Ensure virtual environment is activated
+   - Reinstall dependencies: `pip install -r requirements.txt`
+
+4. **Web Interface Not Loading**
+   - Check if port 5000 is available: `sudo lsof -i :5000`
+   - Try a different port in the configuration
+   - Check firewall settings
+
+## Development
+
+### Project Structure
+```
+sa5x_monitor/
+├── cli/                    # Command-line interface modules
+│   └── main.py
+├── config/                 # Configuration files
+│   └── sa5x_config.json
+├── utils/                  # Utility modules
+│   ├── __init__.py
+│   ├── config_manager.py
+│   ├── holdover_test.py
+│   ├── log_parser.py
+│   └── sa5x_controller.py
+├── web/                    # Web interface modules
+│   ├── app.py
+│   ├── static/            # CSS, JS files
+│   └── templates/         # HTML templates
+├── logs/                   # Log file directory
+├── requirements.txt        # Python dependencies
+├── run_cli.py             # CLI entry point
+├── run_web.py             # Web server entry point
+└── test_setup.py          # Setup verification script
+```
+
+### Adding New Features
+
+1. Create new modules in appropriate directories
+2. Update `__init__.py` files for imports
+3. Add configuration options to `sa5x_config.json`
+4. Update documentation and help text
+
+## License
+
+[Your License Here]
+
+## Contributing
+
+[Contributing Guidelines]
+
+## Support
+
+For issues and questions:
+- Check the troubleshooting section
+- Review existing issues on GitHub
+- Contact support at [support email]

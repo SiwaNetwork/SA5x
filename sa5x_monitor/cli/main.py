@@ -94,15 +94,18 @@ Examples:
             print(f"Temperature Stability: {results['temp_stability']:.3f}°C")
             return
         
-        if not args.port:
-            logger.error("Serial port is required for monitoring and testing")
+        # Use port from args or fall back to config default
+        port = args.port or config.get('serial.default_port')
+        
+        if not port:
+            logger.error("Serial port is required for monitoring and testing. Specify with --port or set in config.")
             sys.exit(1)
         
         # Initialize SA5X controller
         controller = SA5XController(
-            port=args.port,
-            baudrate=args.baudrate,
-            timeout=args.timeout
+            port=port,
+            baudrate=args.baudrate or config.get('serial.default_baudrate', 115200),
+            timeout=args.timeout or config.get('serial.default_timeout', 1.0)
         )
         
         if args.holdover_test:

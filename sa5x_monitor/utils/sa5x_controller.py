@@ -19,6 +19,7 @@ class SA5XController:
         self.timeout = timeout
         self.serial = None
         self.logger = logging.getLogger(__name__)
+        self.last_error = None
         
         # SA5X command constants
         self.COMMANDS = {
@@ -54,6 +55,13 @@ class SA5XController:
                 self.logger.error(f"Serial port {self.port} does not exist")
                 raise serial.SerialException(f"Serial port {self.port} does not exist")
             
+            # Check permissions
+            if not os.access(self.port, os.R_OK | os.W_OK):
+                self.logger.error(f"No read/write permissions for {self.port}")
+                raise PermissionError(f"No read/write permissions for {self.port}")
+            
+            self.logger.info(f"Attempting to connect to {self.port} with baudrate {self.baudrate}")
+            
             self.serial = serial.Serial(
                 port=self.port,
                 baudrate=self.baudrate,
@@ -62,16 +70,29 @@ class SA5XController:
                 parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE
             )
-            self.logger.info(f"Connected to SA5X on {self.port}")
+            
+            # Test if port is really open
+            if not self.serial.is_open:
+                raise serial.SerialException("Port opened but is not active")
+            
+            self.logger.info(f"Successfully connected to SA5X on {self.port}")
             return True
+            
         except serial.SerialException as e:
-            self.logger.error(f"Serial port error: {e}")
+            self.logger.error(f"Serial port error on {self.port}: {str(e)}")
+            self.last_error = f"Serial port error: {str(e)}"
             return False
         except PermissionError as e:
             self.logger.error(f"Permission denied for port {self.port}. Try running with sudo or add user to dialout group")
+            self.last_error = f"Permission denied for {self.port}. Add user to dialout group: sudo usermod -a -G dialout $USER"
+            return False
+        except OSError as e:
+            self.logger.error(f"OS error when accessing {self.port}: {str(e)}")
+            self.last_error = f"OS error: {str(e)}"
             return False
         except Exception as e:
-            self.logger.error(f"Failed to connect to SA5X: {e}")
+            self.logger.error(f"Unexpected error connecting to {self.port}: {type(e).__name__}: {str(e)}")
+            self.last_error = f"Unexpected error: {type(e).__name__}: {str(e)}"
             return False
     
     def disconnect(self):

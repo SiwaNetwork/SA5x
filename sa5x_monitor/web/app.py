@@ -92,7 +92,7 @@ class SA5XWebMonitor:
             """Connect to SA5X"""
             try:
                 data = request.get_json()
-                port = data.get('port', '/dev/ttyS0')
+                port = data.get('port', '/dev/ttyS6')
                 baudrate = data.get('baudrate', 115200)
                 timeout = data.get('timeout', 1.0)
                 
@@ -113,8 +113,10 @@ class SA5XWebMonitor:
                 if self.controller.connect():
                     return jsonify({'status': 'connected', 'port': port})
                 else:
-                    # Get the last error from the controller's logger
-                    error_msg = 'Failed to connect to serial port. Check permissions and port availability.'
+                    # Get the last error from the controller
+                    error_msg = getattr(self.controller, 'last_error', 'Failed to connect to serial port')
+                    if not error_msg:
+                        error_msg = f'Failed to connect to {port}. Check if device is connected and port permissions.'
                     return jsonify({'error': error_msg}), 500
                     
             except Exception as e:

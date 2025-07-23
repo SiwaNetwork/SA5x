@@ -560,6 +560,14 @@ class SA5XMonitor {
         const baudrate = parseInt(document.getElementById('baudrate').value);
         const timeout = parseFloat(document.getElementById('timeout').value);
         
+        // Validate input
+        if (!port || port.trim() === '') {
+            this.showError('Please enter a serial port');
+            return;
+        }
+        
+        console.log(`Attempting to connect to ${port} at ${baudrate} baud`);
+        
         try {
             const response = await fetch('/connect', {
                 method: 'POST',

@@ -96,11 +96,28 @@ class SA5XWebMonitor:
                 baudrate = data.get('baudrate', 115200)
                 timeout = data.get('timeout', 1.0)
                 
+                # Check if port exists before trying to connect
+                import os
+                if not os.path.exists(port):
+                    error_msg = f"Serial port {port} does not exist. Available ports: "
+                    # List available serial ports
+                    import glob
+                    available_ports = glob.glob('/dev/ttyS*') + glob.glob('/dev/ttyUSB*') + glob.glob('/dev/ttyACM*')
+                    if available_ports:
+                        error_msg += ", ".join(available_ports)
+                    else:
+                        error_msg += "none found"
+                    return jsonify({'error': error_msg}), 400
+                
                 self.controller = SA5XController(port, baudrate, timeout)
                 if self.controller.connect():
                     return jsonify({'status': 'connected', 'port': port})
                 else:
-                    return jsonify({'error': 'Failed to connect'}), 500
+                    # Get the last error from the controller
+                    error_msg = getattr(self.controller, 'last_error', 'Failed to connect to serial port')
+                    if not error_msg:
+                        error_msg = f'Failed to connect to {port}. Check if device is connected and port permissions.'
+                    return jsonify({'error': error_msg}), 500
                     
             except Exception as e:
                 self.logger.error(f"Connection failed: {e}")

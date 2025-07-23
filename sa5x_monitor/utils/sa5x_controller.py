@@ -48,6 +48,12 @@ class SA5XController:
     def connect(self) -> bool:
         """Connect to SA5X via serial port"""
         try:
+            # Check if port exists
+            import os
+            if not os.path.exists(self.port):
+                self.logger.error(f"Serial port {self.port} does not exist")
+                raise serial.SerialException(f"Serial port {self.port} does not exist")
+            
             self.serial = serial.Serial(
                 port=self.port,
                 baudrate=self.baudrate,
@@ -58,6 +64,12 @@ class SA5XController:
             )
             self.logger.info(f"Connected to SA5X on {self.port}")
             return True
+        except serial.SerialException as e:
+            self.logger.error(f"Serial port error: {e}")
+            return False
+        except PermissionError as e:
+            self.logger.error(f"Permission denied for port {self.port}. Try running with sudo or add user to dialout group")
+            return False
         except Exception as e:
             self.logger.error(f"Failed to connect to SA5X: {e}")
             return False
